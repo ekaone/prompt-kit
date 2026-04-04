@@ -42,7 +42,7 @@ describe("inject", () => {
 
     it("throws even when some variables are defined", () => {
       expect(() => inject("{{name}} and {{missing}}", { name: "Eka" })).toThrow(
-        "{{missing}}",
+        '[prompt-kit] Undefined variable: "{{missing}}"',
       );
     });
   });
@@ -61,6 +61,23 @@ describe("inject", () => {
       const template = "Hello {{name}}";
       expect(inject(template, {}, { strict: false })).toBe(template);
     });
+
+    it("only matches double braces — single {name} ignored, {{{name}}} partially matched", () => {
+      const result = inject(
+        "{name} and {{{name}}}",
+        { name: "Eka" },
+        { strict: false },
+      );
+      expect(result).toBe("{name} and {Eka}");
+    });
+  });
+
+  describe("nested properties", () => {
+    it("replaces nested property access", () => {
+      expect(inject("Hello, {{user.name}}!", { "user.name": "Eka" })).toBe(
+        "Hello, Eka!",
+      );
+    });
   });
 
   describe("edge cases", () => {
@@ -78,13 +95,12 @@ describe("inject", () => {
       expect(inject("Plain text.", {})).toBe("Plain text.");
     });
 
-    it("only matches double braces — single {name} ignored, {{{name}}} partially matched", () => {
-      const result = inject(
-        "{name} and {{{name}}}",
-        { name: "Eka" },
-        { strict: false },
-      );
-      expect(result).toBe("{name} and {Eka}");
+    it("handles values with braces", () => {
+      expect(inject("{{v}}", { v: "{{not_a_var}}" })).toBe("{{not_a_var}}");
+    });
+
+    it("handles adjacent placeholders", () => {
+      expect(inject("{{a}}{{b}}", { a: "x", b: "y" })).toBe("xy");
     });
   });
 });
