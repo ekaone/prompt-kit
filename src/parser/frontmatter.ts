@@ -44,7 +44,7 @@ export function parseFrontmatter(source: string): ParsedPrompt {
   const [, rawFm, rawBody] = match;
   const frontmatter: FrontMatter = {};
 
-  for (const line of rawFm.split(/\r?\n/)) {
+  for (const line of rawFm!.split(/\r?\n/)) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) continue;
     const parsed = parseLine(trimmed);
@@ -54,5 +54,5 @@ export function parseFrontmatter(source: string): ParsedPrompt {
     }
   }
 
-  return { frontmatter, body: rawBody.trim() };
+  return { frontmatter, body: rawBody!.trim() };
 }
